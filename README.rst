@@ -61,7 +61,7 @@ Just add it to your ``rebar.config`` deps:
 
     {deps, [
         ...
-        {lfebot, ".*", {git, "git@github.com:lfe/lfebot.git", "master"}}
+        {lfebot, ".*", {git, "git@github.com:lfex/lfebot.git", "master"}}
       ]}.
 
 
