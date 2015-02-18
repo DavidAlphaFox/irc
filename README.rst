@@ -76,6 +76,11 @@ And then do the usual:
 Usage
 =====
 
+Configuring
+-----------
+
+TBD
+
 
 Running
 -------
@@ -111,7 +116,7 @@ or
 Stopping
 --------
 
-If you're running in the foregrund, ``^C^C`` will bring you back to the OS
+If you're running in the foreground, ``^Gq`` will bring you back to the OS
 shell.
 
 If you're running in daemonized mode:
@@ -121,9 +126,8 @@ If you're running in daemonized mode:
     $ make stop
 
 
-
-Configuring
------------
+Bot Commands
+------------
 
 TBD
 
