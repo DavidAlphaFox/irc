@@ -28,32 +28,11 @@
   (erlang:monitor 'process pid)
   (gen_server:call 'bot-router `#(add-subscriber ,pid)))
 
-(defun connect (_ _)
-  'noop)
-
 (defun remove-subscriber (pid)
   (gen_server:call 'bot-router `#(remove-subscriber ,pid)))
 
-(defun send (_)
-  'noop)
-
 (defun start_link (cmd-word)
   (gen_server:start_link #(local bot-router) (MODULE) (list cmd-word) '()))
-
-(defun stop-bot ()
-  'noop)
-
-;;;===================================================================
-;;; API, but don't call; really for internal use
-;;;===================================================================
-(defun connected ()
-  'noop)
-
-(defun disconnected ()
-  'noop)
-
-(defun receive-raw (_)
-  'noop)
 
 ;;;===================================================================
 ;;; gen_server callbacks
@@ -67,8 +46,14 @@
 (defun handle_cast (_ _)
   'noop)
 
-(defun handle_info (_ _)
-  'noop)
+(defun handle_info
+  (((tuple 'DOWN _ 'process pid _)
+    (= (match-router-state subscribers subscribers) state))
+    (let ))
+  ((message (= (make-router-state) state))
+    ;; XXX replace the following format call with a lager call
+    (io:format "[~s] Unknown info ~p~n" (list (MODULE) message))
+    `#(noreply ,state)))
 
 (defun terminate (_ _)
   'noop)
@@ -77,19 +62,70 @@
   'noop)
 
 ;;;===================================================================
+;;; IRC events
+;;;===================================================================
+(defun bot-command-channel (nick-from channel command args)
+  (send-subscriber `#(irc-router
+                      command-channel
+                      #(,nick-from ,channel ,command ,args)))
+  'ok)
+
+(defun bot-command-private (nick-from command args)
+  (send-subscriber `#(irc-router
+                      command-private
+                      #(,nick-from ,command ,args)))
+  'ok)
+
+(defun channel-message (nick-from channel line)
+  (send-subscriber `#(irc-router
+                      channel-message
+                      #(,nick-from ,channel ,line)))
+  'ok)
+
+(defun connected ()
+  (send-subscriber #(irc-router connected))
+  'ok)
+
+(defun disconnected ()
+  (send-subscriber #(irc-router disconnected))
+  'ok)
+
+(defun ready ()
+  (send-subscriber #(irc-router ready))
+  'ok)
+
+(defun receive-raw (line)
+  (let *(((cons line-trimmed _) (re:split line "\r\n"))
+         (message `#(irc-router message-received ,(parse-irc line-trimmed))))
+    (gen_server:cast 'bot-router ~#(send-subscriber ,message))))
+
+;;;===================================================================
 ;;; Internal functions
 ;;;===================================================================
-(defun message-subscriber (subscriber pid)
-  'noop)
+(defun send-subscriber (message)
+  (gen_server:cast 'bot-router #(send-subscriber ,message))
+  'ok)
 
-(defun remove-subscriber (subscriber pid)
-  )
+(defun send-subscriber
+  (('() message)
+    'ok)
+  ((pids message)
+    ;; XXX replace the following format call with a lager call
+    (io:format "[~s] send subscribers ~p~n" (list (MODULE) message))
+    (lists:map (lambda (pid) (gen_server:cast pid message)) pids)
+    'ok))
 
-(defun split-nick (nick)
-  'noop)
+(defun remove-subscriber (subscribers pid)
+  ;; XXX replace the following format call with a lager call
+  (io:format "[~s] Remove subscriber ~w~n" (list (MODULE) pid))
+  (lists:delete pid subscribers))
 
-(defun parse-irc (arg)
-  'noop)
 
-(defun parse-irc (prefix rest)
-  'noop)
+(defun parse-irc (line)
+  (let (((cons prefix (cons command args)) (lfebot-util:parse-irc line)))
+    ;; XXX replace the following format call with a lager call
+    (io:format "Prefix '~p'~nCommand '~p'~nArgs '~p'~n"
+               (list prefix command args))
+    (make-irc-message prefix prefix
+                      command command
+                      args args)))
