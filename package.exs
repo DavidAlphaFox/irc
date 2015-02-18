@@ -1,7 +1,7 @@
 Expm.Package.new(
   name: "lfebot",
-  description: "lfebot DESCRIPTION",
+  description: "lfebot IRC bot",
   version: "0.0.1",
-  keywords: ["LFE", "Lisp", "Library", "API"],
-  maintainers: [[name: "YOUR NAME", email: "YOUR@EMAIL.com"]],
-  repositories: [[github: "YOUR_GITHUB_NAME/lfebot]])
+  keywords: ["LFE", "Lisp", "Library", "API", "IRC", "Bot"],
+  maintainers: [[name: "Duncan McGreggor", email: "oubiwann@cogitat.io"]],
+  repositories: [[github: "lfex/lfebot]])
