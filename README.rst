@@ -4,7 +4,7 @@ LiffyBot
 
 *An IRC Bot in Lisp Flavored Erlang*
 
-.. image:: resources/images/LiffyBot-small-3.png
+.. image:: resources/images/LiffyBot-small-5.png
 
 
 Introduction
